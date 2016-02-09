@@ -9,7 +9,6 @@ import (
 )
 
 func Resize(oldf, newf string, width int) error {
-	fmt.Println("Starting")
 
 	args := []string{
 		oldf,
