@@ -4,11 +4,35 @@ import (
 	"fmt"
 	"image"
 	_ "image/gif"
+	"image/jpeg"
 	"os"
 	"testing"
 )
 
+func TestToJpg(t *testing.T) {
+	t.Parallel()
+
+	err := ToJpg("blob.gif", "blob.jpg")
+	if err != nil {
+		t.Errorf("image was not converted properly: %v", err)
+	}
+
+	file, err := os.Open("blob.jpg")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+	}
+
+	_, err = jpeg.Decode(file)
+	if err != nil {
+		t.Errorf("image was not converted properly: %v", err)
+	}
+
+	// cleanup
+	os.Remove("blob.jpg")
+}
+
 func TestResize(t *testing.T) {
+	t.Parallel()
 
 	tests := []struct {
 		O, N string
@@ -28,6 +52,8 @@ func TestResize(t *testing.T) {
 		if newWidth != te.W || newHeight != te.W {
 			t.Errorf("new image dimensions were incorrect : %v, %v", newWidth, newHeight)
 		}
+
+		os.Remove(te.N)
 	}
 }
 

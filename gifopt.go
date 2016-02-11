@@ -1,13 +1,44 @@
+// Page gifopt provides optimization tools for working with gifs in go
 package gifopt
 
 import (
 	"bufio"
 	"fmt"
+	"image/gif"
+	"image/jpeg"
 	"io"
 	"os"
 	"os/exec"
 )
 
+// Allow to convert gif images to jpeg
+// using the first frame
+func ToJpg(oldf, newf string) error {
+	ob, err := os.Open(oldf)
+	defer ob.Close()
+	if err != nil {
+		return err
+	}
+
+	oi, err := gif.Decode(ob)
+	if err != nil {
+		return err
+	}
+
+	outfile, err := os.Create(newf)
+	defer outfile.Close()
+	if err != nil {
+		return err
+	}
+
+	writer := bufio.NewWriter(outfile)
+
+	jpeg.Encode(writer, oi, &jpeg.Options{90})
+
+	return nil
+}
+
+// Resize a gif using gifsicle
 func Resize(oldf, newf string, width int) error {
 
 	args := []string{
@@ -28,10 +59,10 @@ func Resize(oldf, newf string, width int) error {
 	}
 
 	outfile, err := os.Create(newf)
+	defer outfile.Close()
 	if err != nil {
 		return err
 	}
-	defer outfile.Close()
 
 	writer := bufio.NewWriter(outfile)
 
